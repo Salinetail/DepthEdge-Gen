@@ -1,0 +1,127 @@
+import cv2
+import numpy as np
+from get_color import get_dominant_colors
+import math
+
+def add_polaroid_border(img, camera_params, depth, angle, distance, text_color=(30, 30, 30)):
+    print("add_polaroid_border processing...")
+    """
+    使用OpenCV为图片添加符合黄金比例的底部白边，并在白边左侧添加色彩样本图
+    参数:
+        img: 输入图片的numpy数组
+        camera_params: 拍摄参数列表
+        text_color: 文字颜色
+        color_sample_path: 色彩样本图路径（PNG，透明背景）
+    """
+
+    # 获取原图尺寸 (高度, 宽度, 通道数)
+    height, width = img.shape[:2]
+
+    # 黄金比例约为1:1.618，计算需要添加的底部边框高度
+    # 黄金比例 = (原图高度 + 边框高度) / 原图高度 = 1.618
+    current_height = height
+    for i in range(1, 5):
+        current_height = math.ceil(current_height * 0.618)
+    border_height = current_height
+
+    block_width = width // 5
+
+    # 创建白色边框 (BGR格式，白色为(255,255,255))
+    border = np.ones((border_height, width, 3), dtype=np.uint8) * 255
+
+    color_list = get_dominant_colors(img, num_colors=5, resize=True)
+
+    num_circles = 5
+    circle_radius = border_height
+    for i in range(1, 7):
+        circle_radius = math.ceil(circle_radius * 0.618)
+    circle_diameter = circle_radius * 2
+    margin = (border_height - num_circles * circle_diameter) // (num_circles + 1)
+
+    center_x = block_width
+    for i in range(1, 3):
+        center_x = math.ceil(center_x * 0.618)
+
+    if depth is not None:
+        shadow_offset = int(distance)
+        shadow_color = np.full_like(border, 100)
+        shadow_mask = np.zeros_like(border)
+        shadow_blur = 101 | 1  # 阴影高斯模糊核=圆直径，保证为奇数
+
+        rad = math.radians(angle)
+        shadow_offset_x = int(np.cos(rad) * shadow_offset)
+        shadow_offset_y = int(np.sin(rad) * shadow_offset)
+
+        shadow_border = np.zeros((border_height, width), dtype=np.uint8)
+        shadow_border = np.vstack((depth, shadow_border))
+        M = np.float32([[1, 0, shadow_offset_x], [0, 1, shadow_offset_y]])
+        shadow_border = cv2.warpAffine(shadow_border, M, (shadow_border.shape[1], shadow_border.shape[0]), borderValue=0)
+        shadow_border = cv2.GaussianBlur(shadow_border, (shadow_blur, shadow_blur), 0)
+
+        shadow_border = shadow_border[height:border_height + height, :]
+        shadow_border = shadow_border / 255.0
+        shadow_border = np.expand_dims(shadow_border, axis=-1)
+
+        border = (border * (1 - shadow_border) + shadow_color * shadow_border).astype(np.uint8)
+
+        for color_num in range(len(color_list)):
+            center_y = margin + circle_radius + color_num * (circle_diameter + margin)
+            shadow_center = (center_x + int(shadow_offset_x/2), center_y + int(shadow_offset_y/2))
+            cv2.circle(shadow_mask, shadow_center, circle_radius, (255, 255, 255), -1, lineType=cv2.LINE_AA)
+
+        shadow_mask = cv2.GaussianBlur(shadow_mask, (shadow_blur, shadow_blur), 0)
+        shadow_mask = cv2.cvtColor(shadow_mask, cv2.COLOR_BGR2GRAY) / 255.0
+        shadow_mask = np.expand_dims(shadow_mask, axis=-1)
+        border = (border * (1 - shadow_mask) + shadow_color * shadow_mask).astype(np.uint8)
+
+    for i, color in enumerate(color_list):
+        center_y = margin + circle_radius + i * (circle_diameter + margin)
+        rgb = tuple(int(x) for x in color['rgb'])
+        cv2.circle(border, (center_x, center_y), circle_radius, (*rgb, 255), -1, lineType=cv2.LINE_AA)
+
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    font_scale = width * 0.0005
+    thickness = 1 if border_height < 100 else 2  # 根据白边高度调整字体粗细
+
+    # 计算文字位置和内容
+    text_y_len = border_height // len(camera_params)
+    left_margin = width
+    for i in range(1, 2):
+        left_margin = math.ceil(left_margin * 0.618)
+    # 逐行添加文字
+    text_y = 0
+    for line in camera_params:
+        text_x = left_margin
+        # 添加文字
+        cv2.putText(
+            border,
+            line,
+            (text_x, text_y + (text_y_len//2)),
+            font,
+            font_scale,
+            text_color,
+            thickness,
+            cv2.LINE_AA  # 抗锯齿，使文字更平滑
+        )
+        text_y += text_y_len
+
+
+    # 将原图和边框垂直拼接
+    result = np.vstack((img, border))
+    return result
+
+
+if __name__ == "__main__":
+    # 示例用法
+    input_image = r"C:\Users\ver\Desktop\IMG_1993.HEIC.JPG" # 替换为你的图片路径
+    output_image = "output_polaroid.png"  # 输出图片路径，可选
+    depth = cv2.imread(r"C:\Users\ver\Desktop\image_read\depth.png") # 黑白遮罩图片路径
+    depth = cv2.cvtColor(depth, cv2.COLOR_BGR2GRAY)
+    CAMERA_PARAMS = [
+        "Canon EOS R5",
+        "35mm  f/5.6  1/125s  ISO200",
+        "2024-06-10"
+    ]
+    # 调用函数添加拍立得风格边框
+    img = cv2.imread(input_image)
+    add_polaroid_border(img, CAMERA_PARAMS, depth, text_color=(30, 30, 30))

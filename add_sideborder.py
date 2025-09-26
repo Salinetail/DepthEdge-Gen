@@ -4,13 +4,8 @@ import math
 import os
 
 
-def add_side_borders(input_path, depth, angle, distance):
-    # 读取图片
-    image = cv2.imread(input_path)
-    if image is None:
-        raise FileNotFoundError(f"无法读取图片: {input_path}")
-
-    # 获取图片尺寸
+def add_side_borders(image, depth, angle, distance):
+     # 获取图片尺寸
     height, width = image.shape[:2]
     current_border_size = width
     for i in range(1, 7):
@@ -20,11 +15,17 @@ def add_side_borders(input_path, depth, angle, distance):
     if border_size * 2 >= width:
         raise ValueError(f"边框尺寸({border_size})过大，超过图片宽度的一半")
 
+    border_mask = np.zeros_like(image)
     result = np.full_like(image, 255)
-
+    border_mask[border_size:, border_size: width - border_size, :] = result[border_size:, border_size: width - border_size, :]
+    border_mask = cv2.GaussianBlur(border_mask, (50 | 1, 50 | 1), 0)
+    border_mask = cv2.cvtColor(border_mask, cv2.COLOR_BGR2GRAY)
+    border_mask = border_mask / 255.0
+    border_mask = np.expand_dims(border_mask, axis=-1)
 
     # depth根据shadow_offset_x和shadow_offset_y参数位移
     if depth is not None:
+
         shadow_color = np.full_like(image, 100)
 
         rad = math.radians(angle)
@@ -42,8 +43,8 @@ def add_side_borders(input_path, depth, angle, distance):
 
 
     # 即从左边border_size开始，取width - 2*border_size宽度的区域
-    result[border_size :, border_size: width - border_size, :] = image[border_size:, border_size: width - border_size, :]
-
+    result = (result * (1 - border_mask) + image * border_mask).astype(np.uint8)
+    cv2.imwrite("result.jpg", result)
     return result
 
 
@@ -61,4 +62,4 @@ if __name__ == "__main__":
         exit(1)
 
     # 添加左右黑边
-    add_side_borders(input_image, depth)
+    add_side_borders(input_image, depth, 45, 50)

@@ -43,14 +43,14 @@ def get_photo_metadata(image_path):
     # 焦距
     if 'EXIF FocalLength' in tags:
         focal_length = tags['EXIF FocalLength'].values
-        metadata['焦距'] = f"{focal_length[0]} mm"
+        metadata['焦距'] = f"{int(round(focal_length[0], 0))}mm"
     else:
         metadata['焦距'] = '未知'
 
     # 光圈
     if 'EXIF FNumber' in tags:
         f_number = tags['EXIF FNumber'].values[0]
-        metadata['光圈'] = f"f/{f_number}"
+        metadata['光圈'] = f"f/{round(float(f_number), 1)}"
     else:
         metadata['光圈'] = '未知'
 
@@ -91,7 +91,7 @@ def print_metadata(metadata):
 if __name__ == "__main__":
     # 示例用法
     # 替换为你的照片路径
-    photo_path = r"C:\Users\ver\Desktop\IMG_0192.HEIC.JPG"
+    photo_path = r"C:\Users\ver\Desktop\IMG_1993.HEIC.JPG"
 
     # 读取并显示元数据
     metadata = get_photo_metadata(photo_path)

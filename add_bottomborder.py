@@ -1,9 +1,10 @@
 import cv2
 import numpy as np
 from get_color import get_dominant_colors
+from add_font import add_font_to_image, get_word_length
 import math
 
-def add_polaroid_border(img, camera_params, depth, angle, distance, text_color=(30, 30, 30)):
+def add_bottom_border(img, camera_params, depth, angle, distance, text_color=(30, 30, 30)):
     print("add_polaroid_border processing...")
     """
     使用OpenCV为图片添加符合黄金比例的底部白边，并在白边左侧添加色彩样本图
@@ -31,9 +32,9 @@ def add_polaroid_border(img, camera_params, depth, angle, distance, text_color=(
 
     color_list = get_dominant_colors(img, num_colors=5, resize=True)
 
-    num_circles = 5
+    num_circles = 3
     circle_radius = border_height
-    for i in range(1, 7):
+    for i in range(1, 6):
         circle_radius = math.ceil(circle_radius * 0.618)
     circle_diameter = circle_radius * 2
     margin = (border_height - num_circles * circle_diameter) // (num_circles + 1)
@@ -69,7 +70,7 @@ def add_polaroid_border(img, camera_params, depth, angle, distance, text_color=(
             shadow_center = (center_x + int(shadow_offset_x/2), center_y + int(shadow_offset_y/2))
             cv2.circle(shadow_mask, shadow_center, circle_radius, (255, 255, 255), -1, lineType=cv2.LINE_AA)
 
-        shadow_mask = cv2.GaussianBlur(shadow_mask, (shadow_blur, shadow_blur), 0)
+        shadow_mask = cv2.GaussianBlur(shadow_mask, ((int(shadow_blur/2))|1, (int(shadow_blur/2))|1), 0)
         shadow_mask = cv2.cvtColor(shadow_mask, cv2.COLOR_BGR2GRAY) / 255.0
         shadow_mask = np.expand_dims(shadow_mask, axis=-1)
         border = (border * (1 - shadow_mask) + shadow_color * shadow_mask).astype(np.uint8)
@@ -79,33 +80,55 @@ def add_polaroid_border(img, camera_params, depth, angle, distance, text_color=(
         rgb = tuple(int(x) for x in color['rgb'])
         cv2.circle(border, (center_x, center_y), circle_radius, (*rgb, 255), -1, lineType=cv2.LINE_AA)
 
-    font = cv2.FONT_HERSHEY_SIMPLEX
-    font_scale = width * 0.0005
-    thickness = 1 if border_height < 100 else 2  # 根据白边高度调整字体粗细
 
     # 计算文字位置和内容
     text_y_len = border_height // len(camera_params)
-    left_margin = width
-    for i in range(1, 2):
-        left_margin = math.ceil(left_margin * 0.618)
+    right_margin = width
+    for i in range(1, 7):
+        right_margin = math.ceil(right_margin * 0.618)
     # 逐行添加文字
     text_y = 0
-    for line in camera_params:
-        text_x = left_margin
-        # 添加文字
-        cv2.putText(
-            border,
-            line,
-            (text_x, text_y + (text_y_len//2)),
-            font,
-            font_scale,
-            text_color,
-            thickness,
-            cv2.LINE_AA  # 抗锯齿，使文字更平滑
-        )
-        text_y += text_y_len
+
+    font_size = border_height
+    for i in range(1, 5):
+        font_size = math.ceil(font_size * 0.618)
+
+    word_length_1 = get_word_length(
+        camera_params[0],
+        math.ceil(font_size * 0.618)
+    )
+
+    word_length_2 = get_word_length(
+        camera_params[1],
+        font_size
+    )
+
+    border = add_font_to_image(
+        border,
+        camera_params[0],
+        width-right_margin-word_length_1[2]-word_length_1[0],
+        text_y + (text_y_len // 2),
+        math.ceil(font_size * 0.618)
+    )
 
 
+    border = add_font_to_image(
+        border,
+        camera_params[1],
+        width-right_margin-word_length_2[2]-word_length_2[0],
+        (text_y + text_y_len) + (text_y_len // 2),
+        font_size
+    )
+
+    border = add_font_to_image(
+        border,
+        camera_params[2],
+        width-right_margin-word_length_2[2]-word_length_2[0],
+        (text_y + 2*text_y_len) + (text_y_len // 2),
+        math.ceil(font_size * 0.618)
+    )
+
+    cv2.imwrite('test.jpg', border)
     # 将原图和边框垂直拼接
     result = np.vstack((img, border))
     return result
@@ -124,4 +147,4 @@ if __name__ == "__main__":
     ]
     # 调用函数添加拍立得风格边框
     img = cv2.imread(input_image)
-    add_polaroid_border(img, CAMERA_PARAMS, depth, text_color=(30, 30, 30))
+    add_bottom_border(img, CAMERA_PARAMS, depth, 45, 50, text_color=(30, 30, 30))

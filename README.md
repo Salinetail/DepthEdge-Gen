@@ -14,8 +14,8 @@
 
 ```
 image_read/
-├── add_bottonside.py
-├── add_side.py
+├── add_bottomborder.py
+├── add_sideborder.py
 ├── combine_image.py
 ├── get_color.py
 ├── get_depthmap.py
@@ -24,6 +24,8 @@ image_read/
 ├── requirements.txt
 ├── assets/
 │   └── gui.png
+├── font/
+│   └── SmileySans-Oblique.ttf
 ├── model/
 │   └── depth_anything_v2_vitl.pth
 ├── ...
@@ -62,13 +64,18 @@ image_read/
    - 访问 [Depth Anything V2 Large 模型下载链接](https://huggingface.co/depth-anything/Depth-Anything-V2-Large/resolve/main/depth_anything_v2_vitl.pth?download=true)
    - 下载后重命名为 `depth_anything_v2_vitl.pth`，放入 `model/` 文件夹下
 
-4. **运行主界面**
+4. **下载字体文件**
+
+   - 访问 [Smiley Sans 字体下载链接](https://github.com/atelier-anchor/smiley-sans/releases/download/v2.0.1/smiley-sans-v2.0.1.zip)
+   - 解压后将 `SmileySans-Oblique.ttf` 放入 `font/` 文件夹下
+
+5. **运行主界面**
 
    ```bash
    python app.py
    ```
 
-5. **使用说明**
+6. **使用说明**
 
    ![界面示例](assets/gui.png)
 
@@ -96,6 +103,7 @@ image_read/
 - [OpenCV](https://opencv.org/)
 - [Gradio](https://gradio.app/)
 - [Depth Anything V2](https://github.com/DepthAnything/Depth-Anything-V2/)
+- [Smiley Sans](https://github.com/atelier-anchor/smiley-sans)
 
 ---
 

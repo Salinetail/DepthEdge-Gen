@@ -1,4 +1,4 @@
-# 空间感边框生成器
+# 📷 空间感边框生成器
 
 本项目是一个基于OpenCV、Gradio和深度学习的图片处理工具，支持拍立得风格边框、主色彩提取、深度图分区、EXIF信息展示等功能。适合摄影爱好者、AI艺术创作者和图像处理开发者。
 
@@ -13,7 +13,7 @@
 ## 目录结构
 
 ```
-image_read/
+DepthEdge-Gen/
 ├── add_bottomborder.py
 ├── add_sideborder.py
 ├── combine_image.py

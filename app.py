@@ -219,4 +219,4 @@ if __name__ == '__main__':
             outputs=[depth_image]
         )
 
-    demo.launch(share=True)
+    demo.launch()

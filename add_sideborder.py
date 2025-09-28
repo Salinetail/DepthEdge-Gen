@@ -11,7 +11,7 @@ def add_side_borders(image, depth, angle, distance):
     for i in range(1, 7):
         border_size = math.ceil(border_size * 0.618)
     bottom_size = border_size
-    for i in range(1, 4):
+    for i in range(1, 6):
         bottom_size = math.ceil(bottom_size * 0.618)
     # 确保边框尺寸不会超过图片宽度的一半
     if border_size * 2 >= width:

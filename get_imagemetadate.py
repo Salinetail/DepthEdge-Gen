@@ -1,6 +1,6 @@
 import exifread
 import os
-
+import datetime
 
 def get_photo_metadata(image_path):
     """
@@ -13,7 +13,7 @@ def get_photo_metadata(image_path):
         包含相机参数的字典
     """
     # 检查文件是否存在
-    print("get_photo_metadata processing...")
+    print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] get_photo_metadata processing...")
     if not os.path.exists(image_path):
         print(f"错误: 文件 '{image_path}' 不存在")
         return None

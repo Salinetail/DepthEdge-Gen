@@ -2,19 +2,10 @@ import numpy as np
 from sklearn.cluster import KMeans
 import os
 import cv2
+import datetime
 
 def get_dominant_colors(img, num_colors=5, resize=True):
-    """
-    提取图片中的主要色彩
-
-    参数:
-        image_path: 图片路径
-        num_colors: 要提取的主要色彩数量
-        resize: 是否调整图片大小以加快处理速度
-
-    返回:
-        包含主要色彩信息的列表，每个元素是一个字典
-    """
+    print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] get_color processing...")
 
     # 调整图片大小以加快处理速度
     if resize:

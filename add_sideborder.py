@@ -2,10 +2,12 @@ import cv2
 import numpy as np
 import math
 import os
+import datetime
 
 
 def add_side_borders(image, depth, angle, distance):
     # 获取图片尺寸
+    print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] add_side_borders processing...")
     height, width = image.shape[:2]
     border_size = width
     for i in range(1, 7):

@@ -1,10 +1,11 @@
 import cv2
 import numpy as np
 import os
+import datetime
 
 
 def composite_images_with_mask(img1_path, img2, depth):
-    print("combine_image porcessing...")
+    print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] combine_image porcessing...")
     img1 = cv2.imread(img1_path)
     # 确保depth是单通道
     if len(depth.shape) != 2:

@@ -3,8 +3,10 @@ import numpy as np
 from PIL import Image
 import torch
 from depth_anything_v2.dpt import DepthAnythingV2
+import datetime
 
 def get_photo_depth(image_path):
+    print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] get_photo_depth processing...")
     DEVICE = 'cuda' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is_available() else 'cpu'
 
     model_configs = {

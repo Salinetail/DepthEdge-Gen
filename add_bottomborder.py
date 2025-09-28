@@ -3,9 +3,10 @@ import numpy as np
 from get_color import get_dominant_colors
 from add_font import add_font_to_image, get_word_length
 import math
+import datetime
 
 def add_bottom_border(img, camera_params, depth, angle, distance, text_color=(30, 30, 30)):
-    print("add_polaroid_border processing...")
+    print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] add_bottomborder processing...")
     """
     使用OpenCV为图片添加符合黄金比例的底部白边，并在白边左侧添加色彩样本图
     参数:

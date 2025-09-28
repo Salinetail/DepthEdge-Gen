@@ -29,10 +29,10 @@ def add_bottom_border(img, camera_params, depth, angle, distance, text_color=(30
 
     # 创建白色边框 (BGR格式，白色为(255,255,255))
     border = np.ones((border_height, width, 3), dtype=np.uint8) * 255
-
-    color_list = get_dominant_colors(img, num_colors=5, resize=True)
-
     num_circles = 3
+
+    color_list = get_dominant_colors(img, num_circles, resize=True)
+
     circle_radius = border_height
     for i in range(1, 6):
         circle_radius = math.ceil(circle_radius * 0.618)
@@ -69,6 +69,10 @@ def add_bottom_border(img, camera_params, depth, angle, distance, text_color=(30
             center_y = margin + circle_radius + color_num * (circle_diameter + margin)
             shadow_center = (center_x + int(shadow_offset_x/2), center_y + int(shadow_offset_y/2))
             cv2.circle(shadow_mask, shadow_center, circle_radius, (255, 255, 255), -1, lineType=cv2.LINE_AA)
+
+        for i in range(1, 3):
+            current_height = math.ceil(current_height * 0.618)
+
 
         shadow_mask = cv2.GaussianBlur(shadow_mask, ((int(shadow_blur/2))|1, (int(shadow_blur/2))|1), 0)
         shadow_mask = cv2.cvtColor(shadow_mask, cv2.COLOR_BGR2GRAY) / 255.0
@@ -111,7 +115,6 @@ def add_bottom_border(img, camera_params, depth, angle, distance, text_color=(30
         math.ceil(font_size * 0.618)
     )
 
-
     border = add_font_to_image(
         border,
         camera_params[1],
@@ -128,7 +131,6 @@ def add_bottom_border(img, camera_params, depth, angle, distance, text_color=(30
         math.ceil(font_size * 0.618)
     )
 
-    cv2.imwrite('test.jpg', border)
     # 将原图和边框垂直拼接
     result = np.vstack((img, border))
     return result

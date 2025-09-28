@@ -152,8 +152,8 @@ if __name__ == '__main__':
             with gr.Column(scale=1):
                 depth_image = gr.Image(
                     type="numpy",
-                    label="预览图片",
-                    interactive=False
+                    label="深度图预览",
+                    interactive=False,
                 )
 
                 depth_btn = gr.Button("生成深度", variant="primary")
@@ -168,7 +168,7 @@ if __name__ == '__main__':
                 output_image = gr.Image(
                     type="numpy",
                     format='png',
-                    label="预览图片",
+                    label="最终结果",
                     interactive = False
                 )
 
@@ -219,4 +219,4 @@ if __name__ == '__main__':
             outputs=[depth_image]
         )
 
-    demo.launch()
+    demo.launch(share=True)

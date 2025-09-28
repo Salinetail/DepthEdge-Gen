@@ -5,23 +5,27 @@ import os
 
 
 def add_side_borders(image, depth, angle, distance):
-     # 获取图片尺寸
+    # 获取图片尺寸
     height, width = image.shape[:2]
-    current_border_size = width
+    border_size = width
     for i in range(1, 7):
-        current_border_size = math.ceil(current_border_size * 0.618)
-    border_size = current_border_size
+        border_size = math.ceil(border_size * 0.618)
+    bottom_size = border_size
+    for i in range(1, 4):
+        bottom_size = math.ceil(bottom_size * 0.618)
     # 确保边框尺寸不会超过图片宽度的一半
     if border_size * 2 >= width:
         raise ValueError(f"边框尺寸({border_size})过大，超过图片宽度的一半")
 
     border_mask = np.zeros_like(image)
     result = np.full_like(image, 255)
-    border_mask[border_size:, border_size: width - border_size, :] = result[border_size:, border_size: width - border_size, :]
-    border_mask = cv2.GaussianBlur(border_mask, (50 | 1, 50 | 1), 0)
+    # 只在底部延伸 border_size 的高度
+    border_mask[border_size:height - bottom_size, border_size: width - border_size, :] = result[border_size:height - bottom_size, border_size: width - border_size, :]
+    border_mask = cv2.GaussianBlur(border_mask, (10 | 1, 10 | 1), 0)
     border_mask = cv2.cvtColor(border_mask, cv2.COLOR_BGR2GRAY)
     border_mask = border_mask / 255.0
     border_mask = np.expand_dims(border_mask, axis=-1)
+
 
     # depth根据shadow_offset_x和shadow_offset_y参数位移
     if depth is not None:
@@ -44,7 +48,6 @@ def add_side_borders(image, depth, angle, distance):
 
     # 即从左边border_size开始，取width - 2*border_size宽度的区域
     result = (result * (1 - border_mask) + image * border_mask).astype(np.uint8)
-    cv2.imwrite("result.jpg", result)
     return result
 
 
@@ -55,11 +58,11 @@ if __name__ == "__main__":
     depth = cv2.imread(r"C:\Users\ver\Desktop\image_read\depth.png") # 黑白遮罩图片路径
     depth = cv2.cvtColor(depth, cv2.COLOR_BGR2GRAY)
     border_pixels = 100  # 黑边宽度
-
+    image = cv2.imread(input_image)
     # 检查输入文件是否存在
     if not os.path.exists(input_image):
         print(f"错误: 文件不存在 - {input_image}")
         exit(1)
 
     # 添加左右黑边
-    add_side_borders(input_image, depth, 45, 50)
+    add_side_borders(image, depth, 45, 50)

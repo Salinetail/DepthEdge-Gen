@@ -17,7 +17,7 @@ def get_photo_depth(image_path):
     encoder = 'vitl' # or 'vits', 'vitb', 'vitg'
 
     model = DepthAnythingV2(**model_configs[encoder])
-    model.load_state_dict(torch.load(f'model/depth_anything_v2_{encoder}.pth', map_location='cpu'))
+    model.load_state_dict(torch.load(f'model/depth_anything_v2_{encoder}.pth', map_location='cuda'))
     model = model.to(DEVICE).eval()
     photo = cv2.imread(image_path)
     depth = model.infer_image(photo)

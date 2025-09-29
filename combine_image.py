@@ -4,9 +4,8 @@ import os
 import datetime
 
 
-def composite_images_with_mask(img1_path, img2, depth):
+def composite_images_with_mask(img1, img2, depth):
     print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] combine_image porcessing...")
-    img1 = cv2.imread(img1_path)
     # 确保depth是单通道
     if len(depth.shape) != 2:
         raise ValueError("depth遮罩必须是单通道灰度图像")
@@ -31,8 +30,6 @@ def composite_images_with_mask(img1_path, img2, depth):
 
     # 转换为整数类型
     result = result.astype(np.uint8)
-
-    result = cv2.cvtColor(result, cv2.COLOR_BGR2RGB)
 
     return result
 

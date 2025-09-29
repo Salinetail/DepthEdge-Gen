@@ -87,7 +87,7 @@ def add_bottom_border(img, camera_params, depth, angle, distance, text_color=(30
 
 
     # 计算文字位置和内容
-    text_y_len = border_height // len(camera_params)
+    text_y_len = border_height // camera_params.size  # DataFrame有三列
     right_margin = width
     for i in range(1, 7):
         right_margin = math.ceil(right_margin * 0.618)
@@ -99,18 +99,18 @@ def add_bottom_border(img, camera_params, depth, angle, distance, text_color=(30
         font_size = math.ceil(font_size * 0.618)
 
     word_length_1 = get_word_length(
-        camera_params[0],
+        camera_params.loc[0, "相机型号"],
         math.ceil(font_size * 0.618)
     )
 
     word_length_2 = get_word_length(
-        camera_params[1],
+        camera_params.loc[0, "镜头参数"],
         font_size
     )
 
     border = add_font_to_image(
         border,
-        camera_params[0],
+        camera_params.loc[0, "相机型号"],
         width-right_margin-word_length_1[2]-word_length_1[0],
         text_y + (text_y_len // 2),
         math.ceil(font_size * 0.618)
@@ -118,7 +118,7 @@ def add_bottom_border(img, camera_params, depth, angle, distance, text_color=(30
 
     border = add_font_to_image(
         border,
-        camera_params[1],
+        camera_params.loc[0, "镜头参数"],
         width-right_margin-word_length_2[2]-word_length_2[0],
         (text_y + text_y_len) + (text_y_len // 2),
         font_size
@@ -126,7 +126,7 @@ def add_bottom_border(img, camera_params, depth, angle, distance, text_color=(30
 
     border = add_font_to_image(
         border,
-        camera_params[2],
+        camera_params.loc[0, "拍摄时间"],
         width-right_margin-word_length_2[2]-word_length_2[0],
         (text_y + 2*text_y_len) + (text_y_len // 2),
         math.ceil(font_size * 0.618)
@@ -143,11 +143,11 @@ if __name__ == "__main__":
     output_image = "output_polaroid.png"  # 输出图片路径，可选
     depth = cv2.imread(r"C:\Users\ver\Desktop\image_read\depth.png") # 黑白遮罩图片路径
     depth = cv2.cvtColor(depth, cv2.COLOR_BGR2GRAY)
-    CAMERA_PARAMS = [
+    CAMERA_PARAMS = np.array([
         "Canon EOS R5",
         "35mm  f/5.6  1/125s  ISO200",
         "2024-06-10"
-    ]
+    ])
     # 调用函数添加拍立得风格边框
     img = cv2.imread(input_image)
     add_bottom_border(img, CAMERA_PARAMS, depth, 45, 50, text_color=(30, 30, 30))

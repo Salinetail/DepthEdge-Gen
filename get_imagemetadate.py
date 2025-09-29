@@ -3,37 +3,15 @@ import os
 import datetime
 
 def get_photo_metadata(image_path):
-    """
-    读取照片的EXIF元数据，提取关键相机参数
-
-    参数:
-        image_path: 照片文件路径
-
-    返回:
-        包含相机参数的字典
-    """
-    # 检查文件是否存在
     print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] get_photo_metadata processing...")
-    if not os.path.exists(image_path):
-        print(f"错误: 文件 '{image_path}' 不存在")
-        return None
 
-    # 检查文件是否为图片格式
-    valid_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.tiff', '.raw', 'DNG']
-    file_ext = os.path.splitext(image_path)[1].lower()
-    if file_ext not in valid_extensions:
-        print(f"错误: 文件 '{image_path}' 不是支持的图片格式")
-        return None
-
-    # 打开文件并读取EXIF数据
     try:
         with open(image_path, 'rb') as f:
             tags = exifread.process_file(f)
     except Exception as e:
-        print(f"读取文件时出错: {str(e)}")
+        print(f"读取文件时出错")
         return None
 
-    # 提取我们关心的参数
     metadata = {}
 
     # 相机品牌和型号
@@ -75,19 +53,6 @@ def get_photo_metadata(image_path):
 
     return metadata
 
-
-def print_metadata(metadata):
-    """打印照片的元数据信息"""
-    if not metadata:
-        return
-
-    print("\n照片参数信息:")
-    print("-" * 30)
-    for key, value in metadata.items():
-        print(f"{key}: {value}")
-    print("-" * 30)
-
-
 if __name__ == "__main__":
     # 示例用法
     # 替换为你的照片路径
@@ -95,5 +60,4 @@ if __name__ == "__main__":
 
     # 读取并显示元数据
     metadata = get_photo_metadata(photo_path)
-    print_metadata(metadata)
 

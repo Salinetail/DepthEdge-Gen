@@ -5,7 +5,7 @@ import torch
 from depth_anything_v2.dpt import DepthAnythingV2
 import datetime
 
-def get_photo_depth(image_path):
+def get_photo_depth(image):
     print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] get_photo_depth processing...")
     DEVICE = 'cuda' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is_available() else 'cpu'
 
@@ -19,9 +19,8 @@ def get_photo_depth(image_path):
     encoder = 'vitl' # or 'vits', 'vitb', 'vitg'
 
     model = DepthAnythingV2(**model_configs[encoder])
-    model.load_state_dict(torch.load(f'model/depth_anything_v2_{encoder}.pth', map_location='cuda'))
+    model.load_state_dict(torch.load(f'model/depth_anything_v2_{encoder}.pth', map_location=DEVICE))
     model = model.to(DEVICE).eval()
-    photo = cv2.imread(image_path)
-    depth = model.infer_image(photo)
+    depth = model.infer_image(image)
     depth = Image.fromarray(depth)
     return depth

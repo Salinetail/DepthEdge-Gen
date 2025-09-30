@@ -2,20 +2,12 @@ import cv2
 import numpy as np
 from get_color import get_dominant_colors
 from add_font import add_font_to_image, get_word_length
+import pandas as pd
 import math
 import datetime
 
 def add_bottom_border(img, camera_params, depth, angle, distance, text_color=(30, 30, 30)):
     print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] add_bottomborder processing...")
-    """
-    使用OpenCV为图片添加符合黄金比例的底部白边，并在白边左侧添加色彩样本图
-    参数:
-        img: 输入图片的numpy数组
-        camera_params: 拍摄参数列表
-        text_color: 文字颜色
-        color_sample_path: 色彩样本图路径（PNG，透明背景）
-    """
-
     # 获取原图尺寸 (高度, 宽度, 通道数)
     height, width = img.shape[:2]
 
@@ -143,11 +135,11 @@ if __name__ == "__main__":
     output_image = "output_polaroid.png"  # 输出图片路径，可选
     depth = cv2.imread(r"C:\Users\ver\Desktop\image_read\depth.png") # 黑白遮罩图片路径
     depth = cv2.cvtColor(depth, cv2.COLOR_BGR2GRAY)
-    CAMERA_PARAMS = np.array([
-        "Canon EOS R5",
-        "35mm  f/5.6  1/125s  ISO200",
-        "2024-06-10"
-    ])
+    CAMERA_PARAMS = pd.DataFrame([{
+        "相机型号": "Canon EOS R5",
+        "镜头参数": "35mm  f/5.6  1/125s  ISO200",
+        "拍摄时间": "2024-06-10"
+    }])
     # 调用函数添加拍立得风格边框
     img = cv2.imread(input_image)
     add_bottom_border(img, CAMERA_PARAMS, depth, 45, 50, text_color=(30, 30, 30))

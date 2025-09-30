@@ -5,12 +5,12 @@ import numpy as np
 import pandas as pd
 from add_sideborder import add_side_borders
 from combine_image import composite_images_with_mask
-from get_imagemetadate import get_photo_metadata
+from get_imagemetadata import get_photo_metadata, deliver_metadata
 from add_bottomborder import add_bottom_border
 from get_depthmap import get_photo_depth
 
 def check_file_type(image_path):
-    valid_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.tiff', '.raw', '.DNG']
+    valid_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.tiff', '.raw', '.dng']
     file_ext = os.path.splitext(image_path)[1].lower()
     if file_ext not in valid_extensions:
         return False
@@ -74,6 +74,25 @@ def crop_image(image_path, depth_image, up_crop, down_crop, left_crop, right_cro
 def clear_image():
     return None, "等待上传图片..."
 
+def save_image(image_path, image):
+    if image is not None and image_path is not None:
+        base, ext = os.path.splitext(os.path.basename(image_path))
+        if ext.lower() in ['.dng', '.DNG', '.raw', '.tiff', '.tif']:
+            save_name = f"{base}_DEG_output.png"
+        else:
+            save_name = f"{base}_DEG_output{ext}"
+        save_path = os.path.join(os.path.dirname(image_path), save_name)
+        # 处理PNG带alpha通道的情况
+
+        if ext.lower() in ['.jpg', '.jpeg'] and image.shape[-1] == 4:
+            image = cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)
+
+        cv2.imwrite(save_path, cv2.cvtColor(image, cv2.COLOR_RGB2BGR), [cv2.IMWRITE_PNG_COMPRESSION, 0])
+        deliver_metadata(image_path, save_path)
+        return save_path, "图片已保存"
+    else:
+        return None, "等待上传图片..."
+
 def combine_image(image, metadata_need, depth, depth_slider, depth_angle_slider, depth_distance_slider):
     if image is not None:
         if depth is None:
@@ -87,6 +106,7 @@ def combine_image(image, metadata_need, depth, depth_slider, depth_angle_slider,
             side_output = add_side_borders(image, depth, depth_angle_slider, depth_distance_slider)
             combine_output = composite_images_with_mask(image, side_output, depth)
             bottom_output = add_bottom_border(combine_output, metadata_need, depth, depth_angle_slider, depth_distance_slider)
+
 
         return bottom_output
     else:
@@ -151,6 +171,7 @@ if __name__ == '__main__':
         gr.Markdown("上传图片以生成空间感图片边框\n\n"
                     "点击[生成深度]按钮以生成深度图，调整深度距离、阴影角度和阴影距离滑块以获得最佳效果。\n\n"
                     "可选：选择显示图片参数信息并调整裁剪边距。\n\n"
+                    "支持常见图片格式（JPG, JPEG, PNG, GIF, TIFF, RAW, DNG等）,暂不支持HDR"
                     )
 
         with gr.Column():
@@ -214,6 +235,13 @@ if __name__ == '__main__':
                         type="numpy",
                         format='png',
                         label="最终结果",
+                        interactive = False,
+                        show_download_button=False
+                    )
+
+                    output_image_download = gr.File(
+                        label="下载最终结果",
+                        file_types=['.png'],
                         interactive = False
                     )
 
@@ -258,6 +286,12 @@ if __name__ == '__main__':
             outputs=[metadata_need]
         )
 
+        metadata_need.change(
+            fn=combine_image,
+            inputs=[show_image, metadata_need, depth_image, depth_slider, depth_angle_slider, depth_distance_slider],
+            outputs=[output_image]
+        )
+
         show_image.change(
             fn=combine_image,
             inputs=[show_image, metadata_need, depth_image, depth_slider, depth_angle_slider, depth_distance_slider],
@@ -292,6 +326,12 @@ if __name__ == '__main__':
             fn=get_photo_depth,
             inputs=[show_image],
             outputs=[depth_image]
+        )
+
+        output_image.change(
+            fn=save_image,
+            inputs=[input_image, output_image],
+            outputs=[output_image_download, status_bar]
         )
 
     demo.launch()

@@ -2,6 +2,13 @@
 
 本项目是一个基于OpenCV、Gradio和深度学习的图片处理工具，支持拍立得风格边框、主色彩提取、深度图分区、EXIF信息展示等功能。适合摄影爱好者、AI艺术创作者和图像处理开发者。
 
+## 示例图片
+
+![IMG_2003.HEIC_DEG_output](assets/IMG_2003.HEIC_DEG_output.JPG)
+![IMG_3552.HEIC_DEG_output](assets/IMG_3552.HEIC_DEG_output.JPG)
+![IMG_3343.HEIC_DEG_output](assets/IMG_3343.HEIC_DEG_output.JPG)
+![IMG_1539_DEG_output](assets/IMG_1539_DEG_output.png)
+
 ## 主要功能
 
 - **拍立得风格边框**：为图片自动添加底部白边和主色彩圆点，支持阴影、角度、距离等参数自定义。
@@ -15,6 +22,7 @@
 ```
 DepthEdge-Gen/
 ├── add_bottomborder.py
+├── add_font.py
 ├── add_sideborder.py
 ├── combine_image.py
 ├── get_color.py
@@ -22,8 +30,6 @@ DepthEdge-Gen/
 ├── get_imagemetadate.py
 ├── app.py
 ├── requirements.txt
-├── assets/
-│   └── gui.png
 ├── font/
 │   └── SmileySans-Oblique.ttf
 ├── model/

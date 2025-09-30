@@ -5,9 +5,9 @@
 ## 示例图片
 
 <p align="center">
+  <img src="assets/IMG_3343.HEIC_DEG_output.JPG" width="22%"/>
   <img src="assets/IMG_2003.HEIC_DEG_output.JPG" width="22%"/>
   <img src="assets/IMG_3552.HEIC_DEG_output.JPG" width="22%"/>
-  <img src="assets/IMG_3343.HEIC_DEG_output.JPG" width="22%"/>
   <img src="assets/IMG_1539_DEG_output.png" width="22%"/>
 </p>
 

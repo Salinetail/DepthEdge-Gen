@@ -20,8 +20,8 @@ def get_photo_metadata(image_path):
     metadata['相机型号'] = tags.get('Image Model', '未知').values if 'Image Model' in tags else '未知'
 
     # 焦距
-    if 'EXIF FocalLength' in tags:
-        focal_length = tags['EXIF FocalLength'].values
+    if 'EXIF FocalLengthIn35mmFilm' in tags:
+        focal_length = tags['EXIF FocalLengthIn35mmFilm'].values
         metadata['焦距'] = f"{int(round(focal_length[0], 0))}mm"
     else:
         metadata['焦距'] = '未知'
@@ -52,6 +52,28 @@ def get_photo_metadata(image_path):
     else:
         metadata['拍摄时间'] = '未知'
 
+    gps_params = ""
+    if 'GPS GPSLatitude' in tags:
+        gps_params = gps_params + str((float(tags['GPS GPSLatitude'].values[2]))) + "°"
+    else:
+        gps_params = gps_params + '未知'
+
+    if "GPS GPSLatitudeRef" in tags:
+        gps_params = gps_params + str(tags['GPS GPSLatitudeRef'].values)
+    else:
+        gps_params = gps_params + '未知'
+
+    if 'GPS GPSLongitude' in tags:
+        gps_params = gps_params + "    " + str((float(tags['GPS GPSLongitude'].values[2]))) + "°"
+    else:
+        gps_params = gps_params + '未知'
+
+    if 'GPS GPSLongitudeRef' in tags:
+        gps_params = gps_params + str(tags['GPS GPSLongitudeRef'].values)
+    else:
+        gps_params = gps_params + '未知'
+
+    metadata['地理位置'] = gps_params
     return metadata
 
 def deliver_metadata(image_path, output_path):

@@ -6,10 +6,10 @@ import pandas as pd
 import math
 import datetime
 
-def add_bottom_border(img, camera_params, depth, angle, distance, text_color=(30, 30, 30)):
+def add_bottom_border(src_image, image, camera_params, depth, angle, distance, text_color=(30, 30, 30)):
     print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] add_bottomborder processing...")
     # 获取原图尺寸 (高度, 宽度, 通道数)
-    height, width = img.shape[:2]
+    height, width = image.shape[:2]
 
     # 黄金比例约为1:1.618，计算需要添加的底部边框高度
     # 黄金比例 = (原图高度 + 边框高度) / 原图高度 = 1.618
@@ -24,7 +24,7 @@ def add_bottom_border(img, camera_params, depth, angle, distance, text_color=(30
     border = np.ones((border_height, width, 3), dtype=np.uint8) * 255
     num_circles = 3
 
-    color_list = get_dominant_colors(img, num_circles, resize=True)
+    color_list = get_dominant_colors(src_image, num_circles, resize=True)
 
     circle_radius = border_height
     for i in range(1, 6):
@@ -79,7 +79,7 @@ def add_bottom_border(img, camera_params, depth, angle, distance, text_color=(30
 
 
     # 计算文字位置和内容
-    text_y_len = border_height // camera_params.size  # DataFrame有三列
+    text_y_len = border_height // 3  # DataFrame有三列
     right_margin = width
     for i in range(1, 7):
         right_margin = math.ceil(right_margin * 0.618)
@@ -98,6 +98,11 @@ def add_bottom_border(img, camera_params, depth, angle, distance, text_color=(30
     word_length_2 = get_word_length(
         camera_params.loc[0, "镜头参数"],
         font_size
+    )
+
+    word_length_3 = get_word_length(
+        camera_params.loc[0, "地理位置"],
+        math.ceil(font_size * 0.618)
     )
 
     border = add_font_to_image(
@@ -124,8 +129,16 @@ def add_bottom_border(img, camera_params, depth, angle, distance, text_color=(30
         math.ceil(font_size * 0.618)
     )
 
+    border = add_font_to_image(
+        border,
+        camera_params.loc[0, "地理位置"],
+        width-right_margin-word_length_3[2]-word_length_3[0],
+        (text_y + 2*text_y_len) + (text_y_len // 2),
+        math.ceil(font_size * 0.618)
+    )
+
     # 将原图和边框垂直拼接
-    result = np.vstack((img, border))
+    result = np.vstack((image, border))
     return result
 
 

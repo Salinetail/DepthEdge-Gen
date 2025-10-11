@@ -39,8 +39,11 @@ def set_metadata(image_path, metadata_list):
     lens_params_str = "  ".join(lens_params)
     # 拍摄时间
     shoot_time = metadata["拍摄时间"] if "拍摄时间" in metadata_list else ""
+    # 东经北纬
+    Elongitude_Nlatitude = metadata["地理位置"] if "地理位置" in metadata_list else ""
+
     # 构造DataFrame
-    df = pd.DataFrame([[camera_model, lens_params_str, shoot_time]], columns=["相机型号", "镜头参数", "拍摄时间"])
+    df = pd.DataFrame([[camera_model, lens_params_str, shoot_time, Elongitude_Nlatitude]], columns=["相机型号", "镜头参数", "拍摄时间", "地理位置"])
     return df
 
 def rebuild_depth(depth, slider_num):
@@ -100,12 +103,12 @@ def combine_image(image, metadata_need, depth, depth_slider, depth_angle_slider,
             depth = cv2.cvtColor(depth, cv2.COLOR_BGR2GRAY)
             side_output = add_side_borders(image, None, depth_angle_slider, depth_distance_slider)
             combine_output = composite_images_with_mask(image, side_output, depth)
-            bottom_output = add_bottom_border(combine_output, metadata_need, None, depth_angle_slider, depth_distance_slider)
+            bottom_output = add_bottom_border(image, combine_output, metadata_need, None, depth_angle_slider, depth_distance_slider)
         else:
             depth = rebuild_depth(depth, depth_slider)
             side_output = add_side_borders(image, depth, depth_angle_slider, depth_distance_slider)
             combine_output = composite_images_with_mask(image, side_output, depth)
-            bottom_output = add_bottom_border(combine_output, metadata_need, depth, depth_angle_slider, depth_distance_slider)
+            bottom_output = add_bottom_border(image, combine_output, metadata_need, depth, depth_angle_slider, depth_distance_slider)
 
 
         return bottom_output
@@ -198,8 +201,8 @@ if __name__ == '__main__':
 
                     metadata_need = gr.Dataframe(
                         label="图片参数",
-                        headers=["相机型号", "镜头参数", "拍摄时间"],
-                        interactive=False,
+                        headers=["相机型号", "镜头参数", "拍摄时间", "地理位置"],
+                        interactive=True,
                     )
             with gr.Row():
                 with gr.Column(scale=1):
@@ -334,4 +337,4 @@ if __name__ == '__main__':
             outputs=[output_image_download, status_bar]
         )
 
-    demo.launch()
+    demo.launch(server_port=7999)
